@@ -25,6 +25,7 @@ Patch notes(as of 09/26/2024):
 
 '''
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -113,8 +114,8 @@ Time = []
 Xpos.append([x0])
 Ypos.append([y0])
 
-Masst.append([Mti, t0])
-Massf.append([Mfi, t0])
+Masst.append([Mti])
+Massf.append([Mfi])
 
 Yvelo.append([vy0])
 
@@ -170,8 +171,8 @@ dfo = np.sqrt(((x0-xpos) ** 2) + ((y0-ypos) ** 2))
 Xpos.append([xpos])
 Ypos.append([ypos])
 
-Masst.append([Mt, t0])
-Massf.append([Mf, t0])
+Masst.append([Mt])
+Massf.append([Mf])
 
 Yvelo.append([yv])
 
@@ -255,8 +256,8 @@ while Mf > 0:
     Xpos.append([xpos])
     Ypos.append([ypos])
     
-    Masst.append([Mt, t0])
-    Massf.append([Mf, t0])
+    Masst.append([Mt])
+    Massf.append([Mf])
     
     Yvelo.append([yv])
     
@@ -301,9 +302,9 @@ T = t0 + 1
 plt.figure(figsize=(7,5),dpi=300)
 
 plt.plot(0, Mfi, 'ro')
-#plt.plot(t0, Mf, 'ro')
+plt.plot(t0, Mf, 'ro')
 
-plt.plot(Massf, 'r')
+plt.plot(Time, Massf, 'r')
 
 plt.ylim(0, Mfi * 1.5)
 plt.xlim(-1, T)
@@ -317,10 +318,10 @@ plt.show()
 #Graphing Total Mass v time
 plt.figure(figsize=(7,5),dpi=300)
 
-plt.plot(0, Mti, 'go')
-#plt.plot(t0, Mt, 'go')
+plt.plot(0, Mti, 'bo')
+plt.plot(t0, Mt, 'go')
 
-plt.plot(Masst, 'g')
+plt.plot(Time, Masst, 'g')
 
 plt.ylim(0, Mti * 1.5)
 plt.xlim(-1, T)
