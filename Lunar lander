@@ -2,7 +2,7 @@
 
 This code uses the given initial values and creates an interactive program to land Apollo 11 on the moon.
 
-Authors: Whodges
+Author: Whodges
 Version: 09/26/2024
 
 Patch notes(as of 09/26/2024):
@@ -31,21 +31,23 @@ import time
 
 
 def get_input_from_user():
+    """
+    
+
+    Returns
+    -------
+    TYPE
+        .
+    move : input from user.
+    
+    Finds time that it took for a user to input a command
+
+    """
     s = time.time()
     move = input('Press a for left, w for up, d for right, press enter to skip, or p to stop: ')
     e = time.time()
     return e-s, move
 
-def save_time(t0, i):
-    time = t0
-    return time, i
-
-def absoluteval(vy):
-    if vy >= 0:
-        return vy
-    elif vy < 0:
-        vy = vy * (-1)
-        return vy
 
 #initial conditions
 n = 2
@@ -135,14 +137,14 @@ if move == 'a' or move == 'w' or move == 'd':
         vxa = -(thrust/Mt) * t + vxa
         vy = vy + gmoon * t
         if vy < 0:
-            yv = absoluteval(vy)
+            yv = abs(vy)
         else:
             yv = vy
     if move == 'w':
         vyw = (thrust/Mt) * t
         vy = vyw + gmoon * t
         if vy < 0:
-            yv = absoluteval(vy)
+            yv = abs(vy)
         else:
             yv = vy
             
@@ -150,14 +152,14 @@ if move == 'a' or move == 'w' or move == 'd':
         vxd = (thrust/Mt) * t + vxd
         vy = vy + gmoon * t 
         if vy < 0:
-            yv = absoluteval(vy)
+            yv = abs(vy)
         else:
             yv = vy
         
 else:
     vy = vy + gmoon * t
     if vy < 0:
-        yv = absoluteval(vy)
+        yv = abs(vy)
     else:
         yv = vy
 vx = vxa + vxd
@@ -199,13 +201,12 @@ while Mf > 0:
         if move == 'a' or move == 'w' or move == 'd':
             Mf = Mf - br * t
             Mt = Ml + Mf
-            save_time(t0, i)
-            
+
             if move == 'a':
                 vxa = -(thrust/Mt) * t + vxa
                 vy = vy + gmoon * t
                 if vy < 0:
-                    yv = absoluteval(vy)
+                    yv = abs(vy)
                 else:
                     yv = vy
             
@@ -213,7 +214,7 @@ while Mf > 0:
                 vyw = (thrust/Mt) * t
                 vy = vyw + gmoon * t
                 if vy < 0:
-                    yv = absoluteval(vy)
+                    yv = abs(vy)
                 else:
                     yv = vy
             
@@ -221,7 +222,7 @@ while Mf > 0:
                 vxd = (thrust/Mt) * t + vxd
                 vy = vy + gmoon * t
                 if vy < 0:
-                    yv = absoluteval(vy)
+                    yv = abs(vy)
                 else:
                     yv = vy
                         
@@ -232,7 +233,7 @@ while Mf > 0:
         else:
             vy = vy + gmoon * t
             if vy < 0:
-                yv = absoluteval(vy)
+                yv = abs(vy)
             else:
                 yv = vy
     
@@ -240,7 +241,7 @@ while Mf > 0:
         print('\nYou gotta be faster\n')
         vy = vy + gmoon * t
         if vy < 0:
-            yv = absoluteval(vy)
+            yv = abs(vy)
         else:
             yv = vy
     
