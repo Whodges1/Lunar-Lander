@@ -1,0 +1,347 @@
+'''Lunar Lander.
+
+This code uses the given initial values and creates an interactive program to land Apollo 11 on the moon.
+
+Authors: Whodges
+Version: 09/26/2024
+
+Patch notes(as of 09/26/2024):
+    - set up plotting
+    - set up x y positions with respective velocities
+    - set up restrictions if you land in wrong spot too fast 
+    - added all initial values and conditions
+    - added user inputs for movement
+    - added f string limits for all printed values
+    - adds empty line after each print statement 
+    - fixed error with negative under square root
+    - fixed a name error
+    - complete rebuild of code 
+    - fixed a couple of errors relating to win conditions
+    - added timer for user inputs
+    - basic tracing added for lander
+    - can graph fuel mass over time
+    - can graph lander mass over time
+    - can graph absolute velocity in the y over time
+
+'''
+
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+
+def get_input_from_user():
+    s = time.time()
+    move = input('Press a for left, w for up, d for right, press enter to skip, or p to stop: ')
+    e = time.time()
+    return e-s, move
+
+def save_time(t0, i):
+    time = t0
+    return time, i
+
+def absoluteval(vy):
+    if vy >= 0:
+        return vy
+    elif vy < 0:
+        vy = vy * (-1)
+        return vy
+
+#initial conditions
+n = 2
+gmoon = -1.6 #m/s
+bt = 0.3 #s
+br = 500 #kg/s
+t0 = 0 #s
+t = 0.3 #s
+i = 0
+
+#masses
+Mt = (1 + 0.1 * n % 5) * 10 ** 4 #kg
+Mti = (1 + 0.1 * n % 5) * 10 ** 4 #kg
+Mf = 4 * (1 + 0.1 * n % 6) * 10 ** 3 #kg
+Mfi = 4 * (1 + 0.1 * n % 6) * 10 ** 3 #kg
+Ml = ((1 + 0.1 * n % 5) * 10 ** 4) - Mfi #kg
+
+
+#initial forces
+thrust = 4.8 * (1 + 0.05 * n % 4) * 10 ** 4 #N
+Fgl = Ml * gmoon #N
+Fgf = Mf * gmoon #N
+Ft = Fgl + Fgf #N
+
+#initial positions
+x0 = 0 #m
+y0 = 30 * (1 + 4 * n % 5) #m
+vxa = 0
+vxd = 0
+vyw = 0 
+
+#finial position and speed
+sls = 1 #m/s
+xf = 20 #m
+yf = 1.5 #m
+
+#velocity and acceleration calculations
+a = thrust / Mt
+v = a * t
+
+#ypos
+vy0 = 0
+ypos = y0
+xpos = x0
+vy = 0
+
+#game code
+plt.plot(x0, y0, 'ro')
+plt.errorbar(xf, 1.5, yerr = 0.5, xerr = 1)
+plt.plot(xf, 1.5, 'go')
+plt.plot(x0, y0, 'bo')
+plt.axhline(y = 1, color = 'black')
+plt.show()
+
+#creating our lists of saved points 
+Masst = []
+Xpos = []
+Ypos = []
+Massf = []
+Yvelo = []
+Time = []
+
+Xpos.append([x0])
+Ypos.append([y0])
+
+Masst.append([Mti, t0])
+Massf.append([Mfi, t0])
+
+Yvelo.append([vy0])
+
+Time.append([t0])
+
+print(f'\nYou are at ({x0:.2f}, {y0:.2f}) at {t0:.2f}s with {Mf:.2f}kg of fuel.')
+print(f'\nYour destination is ({xf} +- 1m, {yf} +- 0.5m) this location is marked by the green dot with the associated error bars and your speed should not exceed {sls}m/s in the y direction.')
+print('\nYou will have 4 seconds to enter a command for the lander.\n\nWhen you are ready enter your first command to start.\n')
+
+t0 = t0 + 0.3
+
+move = input('Press a for left, w for up, d for right, or press enter to skip: ')
+
+if move == 'a' or move == 'w' or move == 'd':
+    Mf1 = Mf - br * t
+    Mt1 = Ml + Mf
+    Mf = Mf - br * t
+    Mt = Ml + Mf
+    if move == 'a':
+        vxa = -(thrust/Mt) * t + vxa
+        vy = vy + gmoon * t
+        if vy < 0:
+            yv = absoluteval(vy)
+        else:
+            yv = vy
+    if move == 'w':
+        vyw = (thrust/Mt) * t
+        vy = vyw + gmoon * t
+        if vy < 0:
+            yv = absoluteval(vy)
+        else:
+            yv = vy
+            
+    if move == 'd':
+        vxd = (thrust/Mt) * t + vxd
+        vy = vy + gmoon * t 
+        if vy < 0:
+            yv = absoluteval(vy)
+        else:
+            yv = vy
+        
+else:
+    vy = vy + gmoon * t
+    if vy < 0:
+        yv = absoluteval(vy)
+    else:
+        yv = vy
+vx = vxa + vxd
+xpos = xpos + vx * t
+ypos = ypos + vy * t + 0.5 * gmoon * (t ** 2)
+dfo = np.sqrt(((x0-xpos) ** 2) + ((y0-ypos) ** 2))
+   
+Xpos.append([xpos])
+Ypos.append([ypos])
+
+Masst.append([Mt, t0])
+Massf.append([Mf, t0])
+
+Yvelo.append([yv])
+
+Time.append([t0])
+        
+print(f'\nYou are at ({xpos:.2f}, {ypos:.2f}) at {t0:.2f}s which is {dfo:.2f}m from your starting position going at {vx:.2f}m/s in the x direction and {vy:.2f}m/s in the y direction with {Mf:.2f}kg of fuel left.\n')
+
+plt.figure(figsize=(7,5),dpi=300)
+plt.plot(Xpos, Ypos, 'b')
+plt.plot(xf, 1.5, 'go')
+plt.plot(xpos, ypos, 'ro')
+plt.plot(x0, y0, 'bo')
+plt.errorbar(xf, 1.5, yerr = 0.5, xerr = 1)
+plt.axhline(y = 1, color = 'black')
+plt.show()   
+
+while Mf > 0:
+    t0 = t0 + 0.3
+    
+    time_to_respond, move = get_input_from_user()
+    
+    if move == 'p':
+        print('You ended the game.')
+        break
+    
+    if time_to_respond <= 4:
+        if move == 'a' or move == 'w' or move == 'd':
+            Mf = Mf - br * t
+            Mt = Ml + Mf
+            save_time(t0, i)
+            
+            if move == 'a':
+                vxa = -(thrust/Mt) * t + vxa
+                vy = vy + gmoon * t
+                if vy < 0:
+                    yv = absoluteval(vy)
+                else:
+                    yv = vy
+            
+            elif move == 'w':
+                vyw = (thrust/Mt) * t
+                vy = vyw + gmoon * t
+                if vy < 0:
+                    yv = absoluteval(vy)
+                else:
+                    yv = vy
+            
+            elif move == 'd':
+                vxd = (thrust/Mt) * t + vxd
+                vy = vy + gmoon * t
+                if vy < 0:
+                    yv = absoluteval(vy)
+                else:
+                    yv = vy
+                        
+            else:
+                print('You did not enter a valid input.')
+        
+
+        else:
+            vy = vy + gmoon * t
+            if vy < 0:
+                yv = absoluteval(vy)
+            else:
+                yv = vy
+    
+    elif time_to_respond > 4:
+        print('\nYou gotta be faster\n')
+        vy = vy + gmoon * t
+        if vy < 0:
+            yv = absoluteval(vy)
+        else:
+            yv = vy
+    
+    vx = vxa + vxd
+    
+    
+    xpos = xpos + vx * t
+    ypos = ypos + vy * t + 0.5 * gmoon * (t ** 2)
+    dfo = np.sqrt(((x0-xpos) ** 2) + ((y0-ypos) ** 2))
+    
+    Xpos.append([xpos])
+    Ypos.append([ypos])
+    
+    Masst.append([Mt, t0])
+    Massf.append([Mf, t0])
+    
+    Yvelo.append([yv])
+    
+    Time.append([t0])
+    print(f'\nYou are at ({xpos:.2f}, {ypos:.2f}) at {t0:.2f}s which is {dfo:.2f}m from your starting position going at {vx:.2f}m/s in the x direction and {vy:.2f}m/s in the y direction with {Mf:.2f}kg of fuel left.\n')
+    
+    plt.figure(figsize=(7,5),dpi=300)
+    plt.plot(Xpos, Ypos, 'b')
+    plt.plot(10, 1.5, 'go')
+    plt.plot(xpos, ypos, 'ro')
+    plt.plot(x0, y0, 'bo')
+    plt.errorbar(10, 1.5, yerr = 0.5, xerr = 1)
+    plt.axhline(y = 1, color = 'black')
+    plt.show()    
+    
+
+    #win condition
+    if 1 <= ypos < 2:
+        if 9 <= xpos <= 11:
+            if -1 <= vy <= 1:
+                print(f'You Landed safely with {Mf:.2f}kgs of fuel remaining!')
+                break
+            elif vy > 1 or vy < -1:
+                print('You crashed because you were too fast')
+                break
+    elif 1 <= ypos < 2 and xpos < 19 or xpos > 20:
+        print('You landed in the wrong spot')
+        break      
+    elif ypos < 1:
+        print('You crashed')
+        break
+    elif ypos >= y0 + 100:
+        print('Where are you trying to go?\nYou are lost in space.')
+        break
+    elif Mf <= 0:
+        print('You ran out of fuel')
+        break
+
+
+T = t0 + 1
+#Graphing Fuel mass v time
+plt.figure(figsize=(7,5),dpi=300)
+
+plt.plot(0, Mfi, 'ro')
+#plt.plot(t0, Mf, 'ro')
+
+plt.plot(Massf, 'r')
+
+plt.ylim(0, Mfi * 1.5)
+plt.xlim(-1, T)
+plt.xlabel('Time(s)')
+
+plt.ylabel('Fuel Mass(kg)')
+plt.title(f'Fuel Mass v Time, Burn rate of {br:.2f}kg/s')
+
+plt.show()
+
+#Graphing Total Mass v time
+plt.figure(figsize=(7,5),dpi=300)
+
+plt.plot(0, Mti, 'go')
+#plt.plot(t0, Mt, 'go')
+
+plt.plot(Masst, 'g')
+
+plt.ylim(0, Mti * 1.5)
+plt.xlim(-1, T)
+
+plt.xlabel('Time(s)')
+plt.ylabel('Mass of Lander(kg)')
+plt.title('Mass of Lander v Time')
+
+plt.show()
+
+#plotting Y velocity v time
+plt.figure(figsize=(7,5),dpi=300)
+
+plt.plot(0, vy0, 'go')
+plt.plot(t0, yv, 'go')
+
+plt.plot(Time, Yvelo, 'g')
+
+plt.xlim(-1, T)
+
+plt.xlabel('Time(s)')
+plt.ylabel('Speed of Lander(m/s)')
+plt.title('Speed of Lander v Time')
+
+plt.show()
